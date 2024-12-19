@@ -5,22 +5,30 @@ import os
 
 # Function for Encryption
 def encrypt_file(file_data, key):
-    key = key.encode('utf-8')
-    iv = get_random_bytes(16)  # Initialization Vector
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    # Pad data to be multiple of 16 bytes
-    padded_data = file_data + b' ' * (16 - len(file_data) % 16)
-    encrypted_data = cipher.encrypt(padded_data)
-    return iv + encrypted_data
+    try:
+        key = key.encode('utf-8')
+        iv = get_random_bytes(16)  # Initialization Vector
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        # Pad data to be multiple of 16 bytes
+        padded_data = file_data + b' ' * (16 - len(file_data) % 16)
+        encrypted_data = cipher.encrypt(padded_data)
+        return iv + encrypted_data
+    except Exception as e:
+        raise RuntimeError(f"Encryption error: {e}")
 
 # Function for Decryption
 def decrypt_file(file_data, key):
-    key = key.encode('utf-8')
-    iv = file_data[:16]  # Extract IV from the file data
-    encrypted_data = file_data[16:]
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    decrypted_data = cipher.decrypt(encrypted_data)
-    return decrypted_data.rstrip(b' ')  # Remove padding
+    try:
+        key = key.encode('utf-8')
+        iv = file_data[:16]  # Extract IV from the file data
+        encrypted_data = file_data[16:]
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        decrypted_data = cipher.decrypt(encrypted_data)
+        return decrypted_data.rstrip(b' ')  # Remove padding
+    except ValueError as ve:
+        raise ValueError("Invalid key or corrupted file.") from ve
+    except Exception as e:
+        raise RuntimeError(f"Decryption error: {e}")
 
 # Streamlit UI
 st.title("🔒 AES-128 File Encryption & Decryption Tool")
